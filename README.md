@@ -161,3 +161,66 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 - [Next.js](https://nextjs.org/)
 - [Prisma](https://www.prisma.io/)
 - [Next Auth](https://next-auth.js.org/)
+
+## Deployment
+
+### Deploying to Vercel (Free Tier)
+
+1. Create a Vercel Account:
+   - Go to [vercel.com](https://vercel.com)
+   - Sign up with your GitHub account
+
+2. Install Vercel CLI (Optional):
+```bash
+npm install -g vercel
+```
+
+3. Configure Environment Variables:
+   - Create a new project in Vercel
+   - Go to Project Settings > Environment Variables
+   - Add the following variables:
+     ```
+     DATABASE_URL="your-production-database-url"
+     NEXTAUTH_SECRET="your-production-auth-secret"
+     NEXTAUTH_URL="https://your-domain.vercel.app"
+     ```
+
+4. Deploy:
+   
+   **Option 1: Using Vercel Dashboard (Recommended)**
+   - Connect your GitHub repository to Vercel
+   - Select the repository
+   - Configure project settings:
+     - Framework Preset: Next.js
+     - Root Directory: ./
+     - Build Command: `next build`
+   - Click Deploy
+
+   **Option 2: Using Vercel CLI**
+   ```bash
+   # Login to Vercel
+   vercel login
+
+   # Deploy to Vercel
+   vercel
+   ```
+
+5. After Deployment:
+   - Run database migrations:
+     ```bash
+     # Using Vercel CLI
+     vercel env pull .env.production.local
+     npx prisma db push
+     ```
+   - Your app will be live at: `https://your-project-name.vercel.app`
+
+### Important Notes:
+- Set up a production database (e.g., using PlanetScale's free tier)
+- Update NEXTAUTH_URL to match your Vercel deployment URL
+- Ensure all environment variables are properly configured
+- Vercel's free tier includes:
+  - HTTPS enabled
+  - Automatic deployments on push
+  - Preview deployments for pull requests
+  - Basic analytics
+  - Up to 100GB bandwidth per month
