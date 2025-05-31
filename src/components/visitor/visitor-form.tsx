@@ -102,10 +102,19 @@ export function VisitorForm() {
     if (selectedDepartment) {
       // Fetch employees for the selected department
       fetch(`/api/employees?departmentId=${selectedDepartment}`)
-        .then((res) => res.json())
-        .then((data) => setEmployees(data))
+        .then((res) => {
+          if (!res.ok) {
+            throw new Error(`HTTP error! status: ${res.status}`);
+          }
+          return res.json();
+        })
+        .then((data) => {
+          console.log('Employees fetched successfully:', data);
+          setEmployees(data);
+        })
         .catch((error) => {
           console.error("Error fetching employees:", error);
+          console.error("Department ID:", selectedDepartment);
           toast({
             title: "Error",
             description: "Failed to fetch employees. Please try again.",
