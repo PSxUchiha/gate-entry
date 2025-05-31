@@ -100,11 +100,18 @@ export function VisitorForm() {
 
   useEffect(() => {
     if (selectedDepartment) {
+      console.log('Fetching employees for department:', selectedDepartment);
       // Fetch employees for the selected department
       fetch(`/api/employees?departmentId=${selectedDepartment}`)
-        .then((res) => {
+        .then(async (res) => {
           if (!res.ok) {
-            throw new Error(`HTTP error! status: ${res.status}`);
+            const errorText = await res.text();
+            console.error('Response not ok:', {
+              status: res.status,
+              statusText: res.statusText,
+              body: errorText
+            });
+            throw new Error(`HTTP error! status: ${res.status}, body: ${errorText}`);
           }
           return res.json();
         })
