@@ -1,0 +1,83 @@
+@import './animations.css';
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 230 15% 10%;
+    --foreground: 60 30% 98%;
+    
+    --card: 232 14% 18%;
+    --card-foreground: 60 30% 98%;
+    
+    --popover: 232 14% 18%;
+    --popover-foreground: 60 30% 98%;
+    
+    --primary: 210 100% 65%;
+    --primary-foreground: 230 15% 10%;
+    
+    --secondary: 230 89% 78%;
+    --secondary-foreground: 230 15% 10%;
+    
+    --accent: 145 94% 65%;
+    --accent-foreground: 230 15% 10%;
+    
+    --destructive: 0 95% 65%;
+    --destructive-foreground: 230 15% 10%;
+    
+    --muted: 232 14% 18%;
+    --muted-foreground: 215 20% 75%;
+    
+    --border: 210 14% 25%;
+    --input: 210 14% 25%;
+    
+    --radius: 0.5rem;
+  }
+}
+
+@layer components {
+  * {
+    @apply border-border;
+    transition: color 0.2s ease-out, background-color 0.2s ease-out, border-color 0.2s ease-out;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+  }
+
+  .card-interactive {
+    @apply transition-all duration-300 hover:scale-[1.02] hover:shadow-lg hover:shadow-primary/25;
+  }
+
+  .btn, button {
+    @apply font-medium relative overflow-hidden;
+    transition: all 0.2s ease-out;
+  }
+
+  .bg-primary, .bg-secondary, .bg-accent {
+    @apply text-background font-medium;
+  }
+
+  *:focus-visible {
+    @apply outline-2 outline-offset-2 outline-primary/50;
+  }
+
+  .card {
+    @apply shadow-lg shadow-background/10;
+  }
+
+  .text-sm {
+    @apply font-medium tracking-wide;
+  }
+
+  .badge {
+    transition: all 0.3s ease-out;
+  }
+
+  input, select, textarea {
+    transition: all 0.2s ease-out;
+    @apply focus:ring-2 ring-primary/20;
+  }
+} 

@@ -1,0 +1,161 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+ 
+@layer base {
+  :root {
+    /* Dark Dracula Theme */
+    --background: 231 15% 13%; /* #1C1E26 - Darker than standard Dracula */
+    --foreground: 60 30% 96%; /* #F8F8F2 - Dracula foreground */
+
+    --card: 232 14% 18%; /* #282A36 - Dracula background */
+    --card-foreground: 60 30% 96%;
+ 
+    --popover: 231 15% 13%;
+    --popover-foreground: 60 30% 96%;
+ 
+    --primary: 326 100% 74%; /* #FF79C6 - Dracula pink */
+    --primary-foreground: 231 15% 13%;
+ 
+    --secondary: 265 89% 78%; /* #BD93F9 - Dracula purple */
+    --secondary-foreground: 231 15% 13%;
+ 
+    --muted: 232 14% 31%; /* #44475A - Dracula selection */
+    --muted-foreground: 60 30% 96%;
+ 
+    --accent: 135 94% 65%; /* #50FA7B - Dracula green */
+    --accent-foreground: 231 15% 13%;
+ 
+    --destructive: 0 100% 67%; /* #FF5555 - Dracula red */
+    --destructive-foreground: 60 30% 96%;
+
+    --border: 232 14% 31%;
+    --input: 232 14% 31%;
+    --ring: 326 100% 74%;
+ 
+    --radius: 0.5rem;
+
+    /* Dracula colors for data visualization */
+    --chart-1: 326 100% 74%; /* Pink */
+    --chart-2: 265 89% 78%;  /* Purple */
+    --chart-3: 135 94% 65%;  /* Green */
+    --chart-4: 191 97% 77%;  /* Cyan */
+    --chart-5: 31 100% 71%;  /* Orange */
+  }
+ 
+  .dark {
+    /* Dark Dracula Theme */
+    --background: 231 15% 13%;
+    --foreground: 60 30% 96%;
+ 
+    --card: 232 14% 18%;
+    --card-foreground: 60 30% 96%;
+ 
+    --popover: 231 15% 13%;
+    --popover-foreground: 60 30% 96%;
+ 
+    --primary: 326 100% 74%;
+    --primary-foreground: 231 15% 13%;
+ 
+    --secondary: 265 89% 78%;
+    --secondary-foreground: 231 15% 13%;
+ 
+    --muted: 232 14% 31%;
+    --muted-foreground: 60 30% 96%;
+ 
+    --accent: 135 94% 65%;
+    --accent-foreground: 231 15% 13%;
+ 
+    --destructive: 0 100% 67%;
+    --destructive-foreground: 60 30% 96%;
+ 
+    --border: 232 14% 31%;
+    --input: 232 14% 31%;
+    --ring: 326 100% 74%;
+
+    /* Dracula colors for data visualization */
+    --chart-1: 326 100% 74%; /* Pink */
+    --chart-2: 265 89% 78%;  /* Purple */
+    --chart-3: 135 94% 65%;  /* Green */
+    --chart-4: 191 97% 77%;  /* Cyan */
+    --chart-5: 31 100% 71%;  /* Orange */
+  }
+}
+ 
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+  h1 {
+    @apply font-serif tracking-tight text-foreground;
+  }
+  h2, h3, h4, h5, h6 {
+    @apply font-display tracking-tight text-foreground;
+  }
+  input, select, textarea {
+    @apply font-normal bg-background;
+  }
+  
+  /* Enhanced shadows */
+  .shadow-card {
+    @apply shadow-[0_8px_16px_rgba(0,0,0,0.5)];
+  }
+  
+  .border-glow {
+    @apply border-2 border-opacity-50 transition-all duration-200;
+  }
+  
+  /* Enhanced hover states */
+  .hover-lift {
+    @apply hover:translate-y-[-2px] hover:shadow-[0_10px_20px_rgba(0,0,0,0.6)] transition-all duration-200;
+  }
+
+  /* Gradient backgrounds */
+  .bg-gradient-primary {
+    @apply bg-gradient-to-br from-primary/90 to-secondary/90;
+  }
+
+  .bg-gradient-accent {
+    @apply bg-gradient-to-br from-accent/90 to-primary/90;
+  }
+
+  /* Card styles */
+  .card-interactive {
+    @apply bg-card border-2 border-border shadow-card rounded-lg p-6 
+           hover:border-primary hover:shadow-[0_10px_20px_rgba(0,0,0,0.6)] 
+           hover:translate-y-[-2px] transition-all duration-200;
+  }
+
+  /* Button styles */
+  .button-glow {
+    @apply relative overflow-hidden hover:before:opacity-100
+           before:absolute before:inset-0 
+           before:bg-gradient-to-r before:from-primary/0 before:via-primary/50 before:to-primary/0
+           before:opacity-0 before:transition-opacity before:duration-500;
+  }
+
+  /* Focus styles */
+  .focus-ring {
+    @apply focus:ring-2 focus:ring-primary focus:ring-offset-4 focus:ring-offset-background focus:outline-none;
+  }
+
+  /* Status indicators */
+  .status-dot {
+    @apply w-2 h-2 rounded-full;
+  }
+  
+  .status-active {
+    @apply bg-accent shadow-[0_0_8px_rgba(80,250,123,0.5)];
+  }
+  
+  .status-pending {
+    @apply bg-secondary shadow-[0_0_8px_rgba(189,147,249,0.5)];
+  }
+  
+  .status-error {
+    @apply bg-destructive shadow-[0_0_8px_rgba(255,85,85,0.5)];
+  }
+} 
