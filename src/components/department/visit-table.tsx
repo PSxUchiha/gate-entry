@@ -1,16 +1,17 @@
 import { useEffect, useState } from 'react';
-import { Visit } from '@prisma/client';
+import { VisitWithRelations } from '@/types/visit';
 import {
   Table,
   TableBody,
   TableCell,
+  TableHead,
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
 import { VisitStatus } from "@/components/visit/visit-status";
 import { VisitActions } from "@/components/visit/visit-actions";
 
-export function VisitTable({ visits }: { visits: Visit[] }) {
+export function VisitTable({ visits }: { visits: VisitWithRelations[] }) {
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -25,7 +26,14 @@ export function VisitTable({ visits }: { visits: Visit[] }) {
     <div className="rounded-md border">
       <Table>
         <TableHeader>
-          {/* ... existing header ... */}
+          <TableRow>
+            <TableHead>Visitor</TableHead>
+            <TableHead>Company</TableHead>
+            <TableHead>Purpose</TableHead>
+            <TableHead>Created At</TableHead>
+            <TableHead>Status</TableHead>
+            <TableHead>Actions</TableHead>
+          </TableRow>
         </TableHeader>
         <TableBody>
           {visits.map((visit) => (
