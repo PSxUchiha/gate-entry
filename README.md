@@ -1,141 +1,163 @@
-# Gate Entry System
+# Gate Entry Management System
 
-A modern web application for managing visitor access and security in organizations. Built with Next.js, Prisma, and TypeScript.
+A secure and efficient gate entry management system built with Next.js 14, designed for managing visitor access and security protocols.
 
 ## Features
 
-- **Visitor Registration**
-  - Support for both internal employees and external visitors
-  - Automated unique code generation
-  - Email and SMS notifications
-  - Real-time status updates
+### 🔐 Security Features
+- Secure login system for security personnel
+- Department-specific access controls
+- Unique visit codes generation
+- Real-time visit status tracking
+- Comprehensive visit logging
 
-- **Security Dashboard**
-  - Real-time visitor monitoring
-  - Check-in/check-out management
-  - Security alerts and protocols
-  - Visit time tracking
-  - Daily activity reports
+### 👥 Multi-User Support
+- Security dashboard for gate management
+- Department-specific dashboards
+- Visitor registration portal
+- Role-based access control
 
-- **Department Portal**
-  - Visit approval workflow
-  - Meeting status management
-  - Department-specific reports
-  - Employee visit history
+### 📱 Visitor Management
+- Easy-to-use visitor registration form
+- Company/Individual visitor types
+- Visit purpose tracking
+- Duration management
+- Department and employee selection
+- Automatic notifications
 
-## Development Authentication
+### 🔄 Real-time Updates
+- Live visit status updates
+- Dynamic employee lists by department
+- Instant notification system
+- Real-time dashboard updates
 
-For development and testing purposes, the following credentials are available:
+## Getting Started
 
-### Security Team
-- Username: sailsecurity
-- Password: sail
-- Role: Security Team Member
+### Prerequisites
+- Node.js 18.0 or later
+- npm or yarn package manager
+- A modern web browser
 
-### Department Access
+### Installation
 
-#### Research & Development
-- Username: rd_admin
-- Password: rd123
-- Role: Department Admin
+1. Clone the repository:
+```bash
+git clone https://github.com/yourusername/gate-entry.git
+cd gate-entry
+```
 
-#### Steel Production
-- Username: steel_admin
-- Password: steel123
-- Role: Department Admin
+2. Install dependencies:
+```bash
+npm install
+# or
+yarn install
+```
 
-#### Quality Control
-- Username: quality_admin
-- Password: quality123
-- Role: Department Admin
+3. Set up environment variables:
+Create a `.env.local` file in the root directory with:
+```env
+DATABASE_URL="your-database-url"
+NEXTAUTH_SECRET="your-auth-secret"
+```
 
-#### Human Resources
-- Username: hr_admin
-- Password: hr123
-- Role: Department Admin
+4. Run database migrations:
+```bash
+npx prisma migrate dev
+```
 
-#### Process Automation
-- Username: automation_admin
-- Password: automation123
-- Role: Department Admin
+5. Start the development server:
+```bash
+npm run dev
+# or
+yarn dev
+```
 
-**Note**: These are development credentials only. In production, proper authentication with secure password hashing and user management should be implemented.
+Visit `http://localhost:3000` to see the application.
+
+## Usage Guide
+
+### 🚪 Security Login
+1. Access the login page
+2. Select "Security" role
+3. Enter credentials (default: security123)
+4. Access security dashboard
+
+### 🏢 Department Login
+1. Access the login page
+2. Select "Employee" role
+3. Choose department
+4. Enter department credentials
+5. Access department dashboard
+
+### 📝 Visitor Registration
+1. Click "Register Visit" on homepage
+2. Fill in visitor details
+3. Select department and employee
+4. Choose visit duration
+5. Submit request
+6. Receive confirmation
+
+### 👮 Security Dashboard Features
+- View all visits
+- Approve/Reject visits
+- Check-in visitors
+- Complete visits
+- View visit history
+- Search and filter visits
+
+### 👥 Department Dashboard Features
+- View department visits
+- Manage visit requests
+- View visitor history
+- Update visit status
+- Employee management
 
 ## Tech Stack
 
-- **Frontend**: Next.js 14, React 18, Tailwind CSS
-- **Backend**: Next.js API Routes, Prisma ORM
-- **Database**: PostgreSQL
-- **Authentication**: NextAuth.js
-- **Notifications**: Twilio (SMS), Nodemailer (Email)
-- **UI Components**: shadcn/ui
+- **Framework**: Next.js 14
+- **Database**: Prisma
+- **Authentication**: Next Auth
 
-## Prerequisites
+## Project Structure
 
-- Node.js 18.x or later
-- PostgreSQL database
-- Twilio account for SMS notifications
-- SMTP server for email notifications
-
-## Environment Variables
-
-Create a `.env` file in the root directory with the following variables:
-
-```env
-# Database
-DATABASE_URL="postgresql://user:password@localhost:5432/gate_entry_db"
-
-# NextAuth
-NEXTAUTH_URL="http://localhost:3000"
-NEXTAUTH_SECRET="your-secret-key-here"
-
-# Email (Replace with your SMTP settings)
-SMTP_HOST="smtp.gmail.com"
-SMTP_PORT=587
-SMTP_USER="your-email@gmail.com"
-SMTP_PASSWORD="your-app-specific-password"
-
-# Twilio (Replace with your Twilio credentials)
-TWILIO_ACCOUNT_SID="your-account-sid"
-TWILIO_AUTH_TOKEN="your-auth-token"
-TWILIO_PHONE_NUMBER="your-twilio-phone-number"
+```
+gate-entry/
+├── src/
+│   ├── app/              # Next.js app router pages
+│   ├── components/       # Reusable components
+│   ├── lib/             # Utility functions
+│   └── types/           # TypeScript types
+├── prisma/              # Database schema
+└── package.json        # Project dependencies
 ```
 
-## Installation
+## Default Credentials
 
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/yourusername/gate-entry.git
-   cd gate-entry
-   ```
+### Security Login
+- Username: security
+- Password: security123
 
-2. Install dependencies:
-   ```bash
-   npm install
-   ```
+### Department Logins
+- R&D: rd123
+- Steel Production: steel123
+- Quality: quality123
+- HR: hr123
+- Automation: automation123
 
-3. Set up the database:
-   ```bash
-   npx prisma generate
-   npx prisma db push
-   ```
+## Contributing
 
-4. Start the development server:
-   ```bash
-   npm run dev
-   ```
-
-The application will be available at `http://localhost:3000`.
-
-## Deployment
-
-This application is configured for deployment on Vercel:
-
-1. Push your code to GitHub
-2. Import the repository in Vercel
-3. Configure environment variables in Vercel dashboard
-4. Deploy!
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
 
 ## License
 
-MIT
+This project is licensed under the MIT License - see the LICENSE file for details.
+
+## Acknowledgments
+
+- [Next.js](https://nextjs.org/)
+- [Prisma](https://www.prisma.io/)
+- [Next Auth](https://next-auth.js.org/)
