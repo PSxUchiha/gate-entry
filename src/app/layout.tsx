@@ -2,24 +2,28 @@ import "@/styles/globals.css";
 import { Inter } from "next/font/google";
 import { Toaster } from "@/components/ui/toaster";
 import { ThemeProvider } from "@/components/theme-provider";
+import { Metadata } from "next";
 
 const inter = Inter({ subsets: ["latin"] });
 
-export const metadata = {
+export const metadata: Metadata = {
   title: "Gate Entry Management",
   description: "A modern gate entry management system",
   icons: {
     icon: [
       {
-        url: "/favicon.svg",
-        type: "image/svg+xml",
-      }
+        url: "/favicon.ico",
+        sizes: "any",
+      },
     ],
-    shortcut: "/favicon.svg",
-    apple: "/favicon.svg",
+    apple: [
+      {
+        url: "/apple-touch-icon.png",
+        sizes: "180x180",
+        type: "image/png",
+      },
+    ],
   },
-  manifest: "/site.webmanifest",
-  themeColor: "#3694FF",
 };
 
 export default function RootLayout({
@@ -29,12 +33,6 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <head>
-        <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-        <link rel="alternate icon" type="image/png" href="/favicon.png" />
-        <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
-        <link rel="manifest" href="/site.webmanifest" />
-      </head>
       <body className={inter.className}>
         <ThemeProvider
           attribute="class"
