@@ -11,6 +11,14 @@ export interface User {
   password: string;
 }
 
+// Type for client-side user data (excluding sensitive information)
+export interface ClientUser {
+  id: string;
+  name: string;
+  role: Role;
+  departmentId?: string;
+}
+
 // In a real app, these would be hashed and stored in a database
 export const USERS: User[] = [
   {

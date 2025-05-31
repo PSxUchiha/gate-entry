@@ -15,7 +15,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
-import { validateCredentials, type User } from "@/lib/auth";
+import { validateCredentials, type ClientUser } from "@/lib/auth";
 
 const formSchema = z.object({
   username: z.string().min(1, "Username is required"),
@@ -25,7 +25,7 @@ const formSchema = z.object({
 type LoginFormValues = z.infer<typeof formSchema>;
 
 interface LoginFormProps {
-  onSuccess: (userData: User) => void;
+  onSuccess: (userData: ClientUser) => void;
 }
 
 export function LoginForm({ onSuccess }: LoginFormProps) {
