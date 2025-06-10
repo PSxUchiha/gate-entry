@@ -45,10 +45,49 @@ const getStatusColor = (status: string) => {
 export function DepartmentVisitManagement({ visits, onStatusUpdate }: VisitManagementProps) {
   const [filter, setFilter] = useState<"pending" | "active" | "completed">("pending");
   const [filteredVisits, setFilteredVisits] = useState<VisitWithRelations[]>([]);
+  const [localVisits, setLocalVisits] = useState<VisitWithRelations[]>(visits);
+
+  // Update localVisits when props change
+  useEffect(() => {
+    setLocalVisits(visits);
+  }, [visits]);
+
+  // Handle real-time visit updates
+  const handleVisitUpdate = async (visitId: string, status: string) => {
+    try {
+      const response = await fetch(`/api/visits/${visitId}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ status }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to update visit status");
+      }
+
+      const updatedVisit = await response.json();
+      
+      // Update local state
+      setLocalVisits(prevVisits => 
+        prevVisits.map(visit => 
+          visit.id === updatedVisit.id ? updatedVisit : visit
+        )
+      );
+
+      // Call parent's onStatusUpdate if provided
+      if (onStatusUpdate) {
+        onStatusUpdate(visitId, status);
+      }
+    } catch (error) {
+      console.error("Failed to update visit status:", error);
+    }
+  };
 
   // Handle date range changes
   const handleDateRangeChange = (startDate: Date | undefined, endDate: Date | undefined) => {
-    let filtered = [...visits];
+    let filtered = [...localVisits];
 
     // First apply date filter if dates are selected
     if (startDate && endDate) {
@@ -64,7 +103,7 @@ export function DepartmentVisitManagement({ visits, onStatusUpdate }: VisitManag
         case "pending":
           return visit.status === "PENDING";
         case "active":
-          return visit.status === "APPROVED" || visit.status === "CHECKED_IN";
+          return visit.status === "CHECKED_IN";
         case "completed":
           return visit.status === "COMPLETED" || visit.status === "CANCELLED";
         default:
@@ -75,10 +114,10 @@ export function DepartmentVisitManagement({ visits, onStatusUpdate }: VisitManag
     setFilteredVisits(filtered);
   };
 
-  // Update filtered visits when filter changes
+  // Update filtered visits when filter or localVisits change
   useEffect(() => {
     handleDateRangeChange(undefined, undefined);
-  }, [filter, visits]);
+  }, [filter, localVisits]);
 
   return (
     <Card>
@@ -148,6 +187,14 @@ export function DepartmentVisitManagement({ visits, onStatusUpdate }: VisitManag
                     {format(new Date(visit.createdAt), "MMM d, yyyy h:mm a")}
                   </p>
                 </div>
+                {visit.checkInTime && (
+                  <div>
+                    <p className="text-sm font-medium">Check-in Time</p>
+                    <p className="text-sm">
+                      {format(new Date(visit.checkInTime), "MMM d, yyyy h:mm a")}
+                    </p>
+                  </div>
+                )}
               </div>
 
               {visit.status === "PENDING" && (
@@ -155,16 +202,27 @@ export function DepartmentVisitManagement({ visits, onStatusUpdate }: VisitManag
                   <Button
                     variant="default"
                     className="flex-1"
-                    onClick={() => onStatusUpdate(visit.id, "APPROVED")}
+                    onClick={() => handleVisitUpdate(visit.id, "APPROVED")}
                   >
                     Approve
                   </Button>
                   <Button
                     variant="destructive"
                     className="flex-1"
-                    onClick={() => onStatusUpdate(visit.id, "CANCELLED")}
+                    onClick={() => handleVisitUpdate(visit.id, "CANCELLED")}
                   >
                     Reject
+                  </Button>
+                </div>
+              )}
+              
+              {visit.status === "CHECKED_IN" && (
+                <div className="flex justify-end">
+                  <Button
+                    variant="default"
+                    onClick={() => handleVisitUpdate(visit.id, "COMPLETED")}
+                  >
+                    Check Out
                   </Button>
                 </div>
               )}

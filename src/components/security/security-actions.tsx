@@ -2,15 +2,13 @@
 
 import { Button } from "@/components/ui/button";
 import { VisitWithRelations } from "@/types/visit";
-import { useToast } from "@/hooks/use-toast";
 
 interface SecurityActionsProps {
   visit: VisitWithRelations;
+  onUpdate?: (updatedVisit: VisitWithRelations) => void;
 }
 
-export function SecurityActions({ visit }: SecurityActionsProps) {
-  const { toast } = useToast();
-
+export function SecurityActions({ visit, onUpdate }: SecurityActionsProps) {
   const handleStatusUpdate = async (status: string) => {
     try {
       const response = await fetch(`/api/visits/${visit.id}`, {
@@ -25,16 +23,14 @@ export function SecurityActions({ visit }: SecurityActionsProps) {
         throw new Error("Failed to update visit status");
       }
 
-      toast({
-        title: "Status Updated",
-        description: `Visit status has been updated to ${status}`,
-      });
+      const updatedVisit = await response.json();
+      
+      // Call the onUpdate callback with the updated visit data
+      if (onUpdate) {
+        onUpdate(updatedVisit);
+      }
     } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to update visit status. Please try again.",
-        variant: "destructive",
-      });
+      console.error("Failed to update visit status:", error);
     }
   };
 

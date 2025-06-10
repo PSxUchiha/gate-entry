@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { VisitStatus } from "@/components/visit/visit-status";
 import { useToast } from "@/hooks/use-toast";
 import { ActivityFilters } from "@/components/visit/activity-filters";
+import { SecurityActions } from "@/components/security/security-actions";
 
 interface VisitWithRelations extends Visit {
   visitor: Visitor;
@@ -23,13 +24,32 @@ interface VisitManagementProps {
 export function VisitManagement({ visits, onStatusUpdate }: VisitManagementProps) {
   const [filter, setFilter] = useState<"pending" | "active" | "completed">("active");
   const [filteredVisits, setFilteredVisits] = useState<VisitWithRelations[]>([]);
+  const [localVisits, setLocalVisits] = useState<VisitWithRelations[]>(visits);
   const { toast } = useToast();
+
+  // Update localVisits when props change
+  useEffect(() => {
+    setLocalVisits(visits);
+  }, [visits]);
+
+  // Handle real-time visit updates
+  const handleVisitUpdate = (updatedVisit: VisitWithRelations) => {
+    setLocalVisits(prevVisits => 
+      prevVisits.map(visit => 
+        visit.id === updatedVisit.id ? updatedVisit : visit
+      )
+    );
+    // Call the parent's onStatusUpdate if provided
+    if (onStatusUpdate) {
+      onStatusUpdate(updatedVisit.id, updatedVisit.status);
+    }
+  };
 
   // Check for overstayed visits every minute
   useEffect(() => {
     const checkOverstayedVisits = () => {
       const now = new Date();
-      const overstayedVisits = visits.filter((visit) => {
+      const overstayedVisits = localVisits.filter((visit) => {
         if (visit.status !== "CHECKED_IN" || !visit.checkInTime) return false;
         const duration = differenceInMinutes(now, new Date(visit.checkInTime));
         return duration > visit.timeAllotted;
@@ -37,11 +57,7 @@ export function VisitManagement({ visits, onStatusUpdate }: VisitManagementProps
 
       // Show toast for each overstayed visit
       overstayedVisits.forEach((visit) => {
-        toast({
-          title: "Visit Duration Exceeded",
-          description: `${visit.visitor.name} has exceeded their allotted time of ${visit.timeAllotted} minutes in ${visit.department.name}`,
-          variant: "destructive",
-        });
+        console.warn(`${visit.visitor.name} has exceeded their allotted time of ${visit.timeAllotted} minutes in ${visit.department.name}`);
       });
     };
 
@@ -50,11 +66,11 @@ export function VisitManagement({ visits, onStatusUpdate }: VisitManagementProps
     const interval = setInterval(checkOverstayedVisits, 60000);
 
     return () => clearInterval(interval);
-  }, [visits, toast]);
+  }, [localVisits]);
 
   // Handle date range changes
   const handleDateRangeChange = (startDate: Date | undefined, endDate: Date | undefined) => {
-    let filtered = [...visits];
+    let filtered = [...localVisits];
 
     // First apply date filter if dates are selected
     if (startDate && endDate) {
@@ -68,11 +84,11 @@ export function VisitManagement({ visits, onStatusUpdate }: VisitManagementProps
     filtered = filtered.filter((visit) => {
       switch (filter) {
         case "pending":
-          return visit.status === "APPROVED";
+          return visit.status === "APPROVED"; // Show approved visits as pending for check-in
         case "active":
           return visit.status === "CHECKED_IN";
         case "completed":
-          return visit.status === "COMPLETED";
+          return visit.status === "COMPLETED" || visit.status === "CANCELLED";
         default:
           return true;
       }
@@ -81,10 +97,10 @@ export function VisitManagement({ visits, onStatusUpdate }: VisitManagementProps
     setFilteredVisits(filtered);
   };
 
-  // Update filtered visits when filter changes
+  // Update filtered visits when filter or localVisits change
   useEffect(() => {
     handleDateRangeChange(undefined, undefined);
-  }, [filter, visits]);
+  }, [filter, localVisits]);
 
   // Function to check if a visit is overstayed
   const isVisitOverstayed = (visit: VisitWithRelations): boolean => {
@@ -154,6 +170,19 @@ export function VisitManagement({ visits, onStatusUpdate }: VisitManagementProps
                   <p className="text-sm text-muted-foreground">Time</p>
                   <p className="font-medium">{new Date(visit.createdAt).toLocaleString()}</p>
                 </div>
+                <div className="space-y-1 animate-slide-in-bottom" style={{ animationDelay: '0.5s' }}>
+                  <p className="text-sm text-muted-foreground">Duration</p>
+                  <p className="font-medium">{visit.timeAllotted} minutes</p>
+                </div>
+                {visit.checkInTime && (
+                  <div className="space-y-1 animate-slide-in-bottom" style={{ animationDelay: '0.6s' }}>
+                    <p className="text-sm text-muted-foreground">Check-in Time</p>
+                    <p className="font-medium">{new Date(visit.checkInTime).toLocaleString()}</p>
+                  </div>
+                )}
+              </div>
+              <div className="flex justify-end">
+                <SecurityActions visit={visit} onUpdate={handleVisitUpdate} />
               </div>
             </CardContent>
           </Card>
