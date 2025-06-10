@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Visit, Visitor } from "@prisma/client";
+import { Visit, Visitor, Employee, Department } from "@prisma/client";
 import {
   Card,
   CardContent,
@@ -22,16 +22,17 @@ import { ActivityFilters } from "@/components/visit/activity-filters";
 
 type VisitStatus = "PENDING" | "APPROVED" | "REJECTED" | "CHECKED_IN" | "COMPLETED";
 
-interface VisitWithVisitor extends Visit {
+interface VisitWithRelations extends Visit {
   visitor: Visitor;
+  employee: Employee;
+  department: Department;
 }
 
 interface ActivityVisualizationProps {
-  visits: VisitWithVisitor[];
+  visits: VisitWithRelations[];
 }
 
 const COLORS = [
-  "rgb(255, 121, 198)", // Dracula Pink
   "rgb(189, 147, 249)", // Dracula Purple
   "rgb(80, 250, 123)",  // Dracula Green
   "rgb(139, 233, 253)", // Dracula Cyan
@@ -48,7 +49,7 @@ const statusLabels: Record<VisitStatus, string> = {
 };
 
 export function ActivityVisualization({ visits }: ActivityVisualizationProps) {
-  const [filteredVisits, setFilteredVisits] = useState<VisitWithVisitor[]>(visits);
+  const [filteredVisits, setFilteredVisits] = useState<VisitWithRelations[]>(visits);
 
   const handleDateRangeChange = (startDate: Date | undefined, endDate: Date | undefined) => {
     if (!startDate || !endDate) {
@@ -99,21 +100,21 @@ export function ActivityVisualization({ visits }: ActivityVisualizationProps) {
           </CardDescription>
           <ActivityFilters visits={filteredVisits} onDateRangeChange={handleDateRangeChange} />
           <div className="grid grid-cols-4 gap-4 mt-4">
-            <div className="glass p-4 rounded-lg">
-              <p className="text-sm font-medium text-blue-400">Total Visits</p>
-              <p className="text-2xl font-bold text-blue-300">{summaryStats.total}</p>
+            <div className="glass-darker p-4 rounded-lg">
+              <p className="text-sm font-medium text-muted-foreground">Total Visits</p>
+              <p className="text-2xl font-bold text-foreground">{summaryStats.total}</p>
             </div>
-            <div className="glass p-4 rounded-lg">
-              <p className="text-sm font-medium text-green-400">Active Visits</p>
-              <p className="text-2xl font-bold text-green-300">{summaryStats.active}</p>
+            <div className="glass-darker p-4 rounded-lg">
+              <p className="text-sm font-medium text-muted-foreground">Active Visits</p>
+              <p className="text-2xl font-bold text-foreground">{summaryStats.active}</p>
             </div>
-            <div className="glass p-4 rounded-lg">
-              <p className="text-sm font-medium text-purple-400">Completed</p>
-              <p className="text-2xl font-bold text-purple-300">{summaryStats.completed}</p>
+            <div className="glass-darker p-4 rounded-lg">
+              <p className="text-sm font-medium text-muted-foreground">Completed</p>
+              <p className="text-2xl font-bold text-foreground">{summaryStats.completed}</p>
             </div>
-            <div className="glass p-4 rounded-lg">
-              <p className="text-sm font-medium text-yellow-400">Pending</p>
-              <p className="text-2xl font-bold text-yellow-300">{summaryStats.pending}</p>
+            <div className="glass-darker p-4 rounded-lg">
+              <p className="text-sm font-medium text-muted-foreground">Pending</p>
+              <p className="text-2xl font-bold text-foreground">{summaryStats.pending}</p>
             </div>
           </div>
         </CardHeader>
