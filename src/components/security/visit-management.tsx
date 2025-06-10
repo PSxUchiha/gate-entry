@@ -1,27 +1,28 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { VisitWithRelations } from "@/types/visit";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import { differenceInMinutes } from "date-fns";
+import { Visit, Visitor, Employee, Department } from "@prisma/client";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { format, differenceInMinutes } from "date-fns";
-import { useToast } from "@/hooks/use-toast";
 import { VisitStatus } from "@/components/visit/visit-status";
+import { useToast } from "@/hooks/use-toast";
+import { ActivityFilters } from "@/components/visit/activity-filters";
+
+interface VisitWithRelations extends Visit {
+  visitor: Visitor;
+  employee: Employee;
+  department: Department;
+}
 
 interface VisitManagementProps {
   visits: VisitWithRelations[];
-  onStatusUpdate: (visitId: string, status: string) => Promise<void>;
+  onStatusUpdate: (visitId: string, status: string) => void;
 }
 
 export function VisitManagement({ visits, onStatusUpdate }: VisitManagementProps) {
   const [filter, setFilter] = useState<"pending" | "active" | "completed">("active");
+  const [filteredVisits, setFilteredVisits] = useState<VisitWithRelations[]>([]);
   const { toast } = useToast();
 
   // Check for overstayed visits every minute
@@ -51,18 +52,39 @@ export function VisitManagement({ visits, onStatusUpdate }: VisitManagementProps
     return () => clearInterval(interval);
   }, [visits, toast]);
 
-  const filteredVisits = visits.filter((visit) => {
-    switch (filter) {
-      case "pending":
-        return visit.status === "APPROVED";
-      case "active":
-        return visit.status === "CHECKED_IN";
-      case "completed":
-        return visit.status === "COMPLETED";
-      default:
-        return true;
+  // Handle date range changes
+  const handleDateRangeChange = (startDate: Date | undefined, endDate: Date | undefined) => {
+    let filtered = [...visits];
+
+    // First apply date filter if dates are selected
+    if (startDate && endDate) {
+      filtered = filtered.filter(visit => {
+        const visitDate = new Date(visit.createdAt);
+        return visitDate >= startDate && visitDate <= endDate;
+      });
     }
-  });
+
+    // Then apply status filter
+    filtered = filtered.filter((visit) => {
+      switch (filter) {
+        case "pending":
+          return visit.status === "APPROVED";
+        case "active":
+          return visit.status === "CHECKED_IN";
+        case "completed":
+          return visit.status === "COMPLETED";
+        default:
+          return true;
+      }
+    });
+
+    setFilteredVisits(filtered);
+  };
+
+  // Update filtered visits when filter changes
+  useEffect(() => {
+    handleDateRangeChange(undefined, undefined);
+  }, [filter, visits]);
 
   // Function to check if a visit is overstayed
   const isVisitOverstayed = (visit: VisitWithRelations): boolean => {
@@ -73,28 +95,31 @@ export function VisitManagement({ visits, onStatusUpdate }: VisitManagementProps
 
   return (
     <div className="space-y-4 animate-fade-in">
-      <div className="flex gap-2 bg-card/50 p-4 rounded-lg animate-slide-in-bottom">
-        <Button
-          variant={filter === "pending" ? "default" : "outline"}
-          onClick={() => setFilter("pending")}
-          className="min-w-[100px] hover-lift"
-        >
-          Pending
-        </Button>
-        <Button
-          variant={filter === "active" ? "default" : "outline"}
-          onClick={() => setFilter("active")}
-          className="min-w-[100px] hover-lift"
-        >
-          Active
-        </Button>
-        <Button
-          variant={filter === "completed" ? "default" : "outline"}
-          onClick={() => setFilter("completed")}
-          className="min-w-[100px] hover-lift"
-        >
-          Completed
-        </Button>
+      <div className="flex flex-col gap-4 bg-card/50 p-4 rounded-lg animate-slide-in-bottom">
+        <div className="flex gap-2">
+          <Button
+            variant={filter === "pending" ? "default" : "outline"}
+            onClick={() => setFilter("pending")}
+            className="min-w-[100px] hover-lift"
+          >
+            Pending
+          </Button>
+          <Button
+            variant={filter === "active" ? "default" : "outline"}
+            onClick={() => setFilter("active")}
+            className="min-w-[100px] hover-lift"
+          >
+            Active
+          </Button>
+          <Button
+            variant={filter === "completed" ? "default" : "outline"}
+            onClick={() => setFilter("completed")}
+            className="min-w-[100px] hover-lift"
+          >
+            Completed
+          </Button>
+        </div>
+        <ActivityFilters visits={filteredVisits} onDateRangeChange={handleDateRangeChange} />
       </div>
 
       <div className="grid gap-4 stagger-animate">
@@ -122,68 +147,17 @@ export function VisitManagement({ visits, onStatusUpdate }: VisitManagementProps
                   <p className="font-medium">{visit.department.name}</p>
                 </div>
                 <div className="space-y-1 animate-slide-in-bottom" style={{ animationDelay: '0.3s' }}>
-                  <p className="text-sm text-muted-foreground">Duration</p>
-                  <p className={`font-medium ${isVisitOverstayed(visit) ? "text-destructive animate-pulse-subtle" : ""}`}>
-                    {visit.timeAllotted} minutes
-                    {visit.status === "CHECKED_IN" && visit.checkInTime && (
-                      <span className="ml-1 text-muted-foreground">
-                        ({differenceInMinutes(new Date(), new Date(visit.checkInTime))} mins elapsed)
-                      </span>
-                    )}
-                  </p>
+                  <p className="text-sm text-muted-foreground">Purpose</p>
+                  <p className="font-medium">{visit.purpose}</p>
                 </div>
                 <div className="space-y-1 animate-slide-in-bottom" style={{ animationDelay: '0.4s' }}>
-                  <p className="text-sm text-muted-foreground">Unique Code</p>
-                  <p className="font-mono font-medium">{visit.uniqueCode}</p>
+                  <p className="text-sm text-muted-foreground">Time</p>
+                  <p className="font-medium">{new Date(visit.createdAt).toLocaleString()}</p>
                 </div>
-              </div>
-
-              <div className="flex gap-2 animate-slide-in-bottom" style={{ animationDelay: '0.5s' }}>
-                {visit.status === "APPROVED" && (
-                  <Button
-                    className="flex-1 hover-lift"
-                    variant="default"
-                    onClick={() => onStatusUpdate(visit.id, "CHECKED_IN")}
-                  >
-                    Check In
-                  </Button>
-                )}
-                {visit.status === "CHECKED_IN" && (
-                  <Button
-                    className="flex-1 hover-lift"
-                    variant="default"
-                    onClick={() => onStatusUpdate(visit.id, "COMPLETED")}
-                  >
-                    Complete Visit
-                  </Button>
-                )}
-                {visit.status === "PENDING" && (
-                  <>
-                    <Button
-                      variant="default"
-                      className="flex-1 bg-accent hover:bg-accent/90 hover-lift"
-                      onClick={() => onStatusUpdate(visit.id, "APPROVED")}
-                    >
-                      Approve
-                    </Button>
-                    <Button
-                      variant="destructive"
-                      className="flex-1 hover-lift"
-                      onClick={() => onStatusUpdate(visit.id, "CANCELLED")}
-                    >
-                      Cancel
-                    </Button>
-                  </>
-                )}
               </div>
             </CardContent>
           </Card>
         ))}
-        {filteredVisits.length === 0 && (
-          <div className="text-center py-8 text-muted-foreground bg-card/50 rounded-lg animate-fade-in">
-            No visits found
-          </div>
-        )}
       </div>
     </div>
   );

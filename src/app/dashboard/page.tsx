@@ -4,10 +4,10 @@ import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { Visit, Visitor, Employee, Department } from "@prisma/client";
 import { VisitManagement } from "@/components/security/visit-management";
-import { ActivityVisualization } from "@/components/security/activity-visualization";
+import { ActivityVisualization as SecurityActivityVisualization } from "@/components/security/activity-visualization";
 import { DashboardHeader } from "@/components/security/dashboard-header";
 import { DepartmentVisitManagement } from "@/components/department/visit-management";
-import { DepartmentActivityVisualization } from "@/components/department/activity-visualization";
+import { ActivityVisualization as DepartmentActivityVisualization } from "@/components/department/activity-visualization";
 import { DepartmentDashboardHeader } from "@/components/department/dashboard-header";
 import { Tabs, TabsContent } from "@/components/ui/tabs";
 
@@ -122,7 +122,7 @@ export default function DashboardPage() {
         </TabsContent>
 
         <TabsContent value="activity" className="mt-6">
-          <ActivityVisualization visits={visits} />
+          <SecurityActivityVisualization visits={visits} />
         </TabsContent>
       </Tabs>
     </div>

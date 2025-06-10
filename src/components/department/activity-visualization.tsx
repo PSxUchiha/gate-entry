@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { Visit, Visitor, Employee, Department } from "@prisma/client";
 import {
   Card,
@@ -15,10 +15,11 @@ import {
   XAxis,
   YAxis,
   CartesianGrid,
-  Tooltip,
   ResponsiveContainer,
   Cell,
+  Legend,
 } from "recharts";
+import { ActivityFilters } from "@/components/visit/activity-filters";
 
 interface VisitWithRelations extends Visit {
   visitor: Visitor;
@@ -31,152 +32,177 @@ interface ActivityVisualizationProps {
 }
 
 const COLORS = {
-  PENDING: "#eab308", // yellow-600
-  APPROVED: "#16a34a", // green-600
-  CHECKED_IN: "#2563eb", // blue-600
-  COMPLETED: "#9333ea", // purple-600
-  CANCELLED: "#dc2626", // red-600
+  visits: "rgb(255, 121, 198)", // Dracula Pink
+  employees: "rgb(189, 147, 249)", // Dracula Purple
 };
 
-export function DepartmentActivityVisualization({ visits }: ActivityVisualizationProps) {
-  const todayVisits = useMemo(() => {
-    const today = new Date();
-    return visits.filter((visit) => {
+export function ActivityVisualization({ visits }: ActivityVisualizationProps) {
+  const [filteredVisits, setFilteredVisits] = useState<VisitWithRelations[]>(visits);
+
+  const handleDateRangeChange = (startDate: Date | undefined, endDate: Date | undefined) => {
+    if (!startDate || !endDate) {
+      setFilteredVisits(visits);
+      return;
+    }
+
+    const filtered = visits.filter(visit => {
       const visitDate = new Date(visit.createdAt);
-      return (
-        visitDate.getDate() === today.getDate() &&
-        visitDate.getMonth() === today.getMonth() &&
-        visitDate.getFullYear() === today.getFullYear()
-      );
+      return visitDate >= startDate && visitDate <= endDate;
     });
-  }, [visits]);
+    setFilteredVisits(filtered);
+  };
 
-  const employeeStats = useMemo(() => {
-    const stats = new Map<string, { name: string; visits: number; active: number }>();
+  const dailyStats = useMemo(() => {
+    const stats = new Map<string, { date: string; visits: number; employees: number }>();
     
-    todayVisits.forEach((visit) => {
-      const emp = visit.employee.name;
-      const current = stats.get(emp) || { name: emp, visits: 0, active: 0 };
+    filteredVisits.forEach((visit) => {
+      const date = new Date(visit.createdAt).toLocaleDateString();
+      const current = stats.get(date) || { date, visits: 0, employees: 0 };
       current.visits += 1;
-      if (visit.status === "CHECKED_IN") {
-        current.active += 1;
-      }
-      stats.set(emp, current);
+      
+      // Count unique employees per day
+      const employeeStats = new Set(
+        filteredVisits
+          .filter(v => new Date(v.createdAt).toLocaleDateString() === date)
+          .map(v => v.employeeId)
+      );
+      current.employees = employeeStats.size;
+      
+      stats.set(date, current);
     });
 
-    return Array.from(stats.values());
-  }, [todayVisits]);
+    return Array.from(stats.values())
+      .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
+      .slice(-7); // Last 7 days
+  }, [filteredVisits]);
 
-  const statusStats = useMemo(() => {
-    const stats = {
-      total: todayVisits.length,
-      pending: todayVisits.filter((v) => v.status === "PENDING").length,
-      approved: todayVisits.filter((v) => v.status === "APPROVED").length,
-      active: todayVisits.filter((v) => v.status === "CHECKED_IN").length,
-      completed: todayVisits.filter((v) => v.status === "COMPLETED").length,
-      cancelled: todayVisits.filter((v) => v.status === "CANCELLED").length,
+  const summaryStats = useMemo(() => {
+    const uniqueEmployees = new Set(filteredVisits.map(v => v.employeeId));
+    
+    return {
+      total: filteredVisits.length,
+      active: filteredVisits.filter((v) => v.status === "CHECKED_IN").length,
+      completed: filteredVisits.filter((v) => v.status === "COMPLETED").length,
+      uniqueEmployees: uniqueEmployees.size,
     };
-    return stats;
-  }, [todayVisits]);
-
-  const statusData = useMemo(() => {
-    return [
-      { name: "Pending", value: statusStats.pending, color: COLORS.PENDING },
-      { name: "Approved", value: statusStats.approved, color: COLORS.APPROVED },
-      { name: "Active", value: statusStats.active, color: COLORS.CHECKED_IN },
-      { name: "Completed", value: statusStats.completed, color: COLORS.COMPLETED },
-      { name: "Cancelled", value: statusStats.cancelled, color: COLORS.CANCELLED },
-    ];
-  }, [statusStats]);
+  }, [filteredVisits]);
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Daily Activity</CardTitle>
-        <CardDescription>
-          Overview of today's visit requests and their status
-        </CardDescription>
-        <div className="grid grid-cols-3 gap-4 mt-4">
-          <div className="p-4 border rounded-lg bg-blue-50">
-            <p className="text-sm font-medium text-blue-600">Total Requests</p>
-            <p className="text-2xl font-bold text-blue-700">{statusStats.total}</p>
+    <div className="relative">
+      <div className="glow-primary -top-10 -left-10" />
+      <div className="glow-accent bottom-10 right-10" />
+      
+      <Card className="glass-card relative z-10">
+        <CardHeader>
+          <CardTitle>Department Activity</CardTitle>
+          <CardDescription>
+            Overview of visits and employee engagement
+          </CardDescription>
+          <ActivityFilters visits={filteredVisits} onDateRangeChange={handleDateRangeChange} />
+          <div className="grid grid-cols-4 gap-4 mt-4">
+            <div className="glass-darker p-4 rounded-lg">
+              <p className="text-sm font-medium text-muted-foreground">Total Requests</p>
+              <p className="text-2xl font-bold text-foreground">{summaryStats.total}</p>
+            </div>
+            <div className="glass-darker p-4 rounded-lg">
+              <p className="text-sm font-medium text-muted-foreground">Active Visits</p>
+              <p className="text-2xl font-bold text-foreground">{summaryStats.active}</p>
+            </div>
+            <div className="glass-darker p-4 rounded-lg">
+              <p className="text-sm font-medium text-muted-foreground">Completed</p>
+              <p className="text-2xl font-bold text-foreground">{summaryStats.completed}</p>
+            </div>
+            <div className="glass-darker p-4 rounded-lg">
+              <p className="text-sm font-medium text-muted-foreground">Active Employees</p>
+              <p className="text-2xl font-bold text-foreground">{summaryStats.uniqueEmployees}</p>
+            </div>
           </div>
-          <div className="p-4 border rounded-lg bg-green-50">
-            <p className="text-sm font-medium text-green-600">Approved/Active</p>
-            <p className="text-2xl font-bold text-green-700">
-              {statusStats.approved + statusStats.active}
-            </p>
-          </div>
-          <div className="p-4 border rounded-lg bg-purple-50">
-            <p className="text-sm font-medium text-purple-600">Completed Today</p>
-            <p className="text-2xl font-bold text-purple-700">{statusStats.completed}</p>
-          </div>
-        </div>
-      </CardHeader>
-      <CardContent>
-        <div className="space-y-8">
-          <div>
-            <h3 className="text-lg font-semibold mb-4">Visit Status Distribution</h3>
-            <div className="h-[200px]">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={statusData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="name" />
-                  <YAxis />
-                  <Tooltip
-                    content={({ active, payload }) => {
-                      if (active && payload && payload.length) {
-                        const data = payload[0].payload;
-                        return (
-                          <div className="bg-white p-2 border rounded shadow-sm">
-                            <p className="font-medium">{data.name}</p>
-                            <p className="text-sm">Count: {data.value}</p>
-                          </div>
-                        );
-                      }
-                      return null;
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-6">
+            <div className="glass-darker p-6 rounded-lg">
+              <ResponsiveContainer width="100%" height={300}>
+                <BarChart data={dailyStats} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+                  <CartesianGrid 
+                    strokeDasharray="3 3" 
+                    opacity={0.1} 
+                    vertical={false}
+                  />
+                  <XAxis 
+                    dataKey="date" 
+                    stroke="currentColor" 
+                    opacity={0.7}
+                    axisLine={false}
+                    tickLine={false}
+                    tickFormatter={(value) => new Date(value).toLocaleDateString('en-US', { weekday: 'short' })}
+                  />
+                  <YAxis 
+                    stroke="currentColor" 
+                    opacity={0.7}
+                    axisLine={false}
+                    tickLine={false}
+                    tickFormatter={(value) => `${value}`}
+                  />
+                  <Legend 
+                    verticalAlign="top" 
+                    height={36}
+                    formatter={(value) => {
+                      return value.charAt(0).toUpperCase() + value.slice(1);
                     }}
                   />
-                  <Bar dataKey="value">
-                    {statusData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={entry.color} />
-                    ))}
-                  </Bar>
+                  <Bar 
+                    dataKey="visits" 
+                    fill={COLORS.visits}
+                    radius={[4, 4, 0, 0]}
+                    fillOpacity={0.8}
+                    name="Visits"
+                  />
+                  <Bar 
+                    dataKey="employees" 
+                    fill={COLORS.employees}
+                    radius={[4, 4, 0, 0]}
+                    fillOpacity={0.8}
+                    name="Employees"
+                  />
                 </BarChart>
               </ResponsiveContainer>
             </div>
-          </div>
 
-          <div>
-            <h3 className="text-lg font-semibold mb-4">Employee Visit Distribution</h3>
-            <div className="h-[200px]">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={employeeStats} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="name" />
-                  <YAxis />
-                  <Tooltip
-                    content={({ active, payload }) => {
-                      if (active && payload && payload.length) {
-                        const data = payload[0].payload;
-                        return (
-                          <div className="bg-white p-2 border rounded shadow-sm">
-                            <p className="font-medium">{data.name}</p>
-                            <p className="text-sm">Total Visits: {data.visits}</p>
-                            <p className="text-sm">Active Now: {data.active}</p>
-                          </div>
-                        );
-                      }
-                      return null;
-                    }}
-                  />
-                  <Bar dataKey="visits" fill="#2563eb" />
-                </BarChart>
-              </ResponsiveContainer>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              {dailyStats.map((day) => (
+                <div 
+                  key={day.date}
+                  className="glass p-4 rounded-lg text-center"
+                >
+                  <p className="text-sm font-medium mb-2 text-muted-foreground">
+                    {new Date(day.date).toLocaleDateString('en-US', { 
+                      weekday: 'short',
+                      month: 'short',
+                      day: 'numeric'
+                    })}
+                  </p>
+                  <div className="space-y-2">
+                    <div>
+                      <div className="w-3 h-3 rounded-full mx-auto mb-1" style={{ backgroundColor: COLORS.visits }} />
+                      <p className="text-lg font-bold" style={{ color: COLORS.visits }}>
+                        {day.visits}
+                      </p>
+                      <p className="text-xs text-muted-foreground">Visits</p>
+                    </div>
+                    <div>
+                      <div className="w-3 h-3 rounded-full mx-auto mb-1" style={{ backgroundColor: COLORS.employees }} />
+                      <p className="text-lg font-bold" style={{ color: COLORS.employees }}>
+                        {day.employees}
+                      </p>
+                      <p className="text-xs text-muted-foreground">Employees</p>
+                    </div>
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
-        </div>
-      </CardContent>
-    </Card>
+        </CardContent>
+      </Card>
+    </div>
   );
 } 

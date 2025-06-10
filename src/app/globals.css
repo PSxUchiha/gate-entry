@@ -4,14 +4,14 @@
  
 @layer base {
   :root {
-    /* Dark Dracula Theme */
-    --background: 231 15% 13%; /* #1C1E26 - Darker than standard Dracula */
+    /* Dark Dracula Theme - Slightly Brighter */
+    --background: 231 15% 18%; /* Brightened from 13% to 18% */
     --foreground: 60 30% 96%; /* #F8F8F2 - Dracula foreground */
 
-    --card: 232 14% 18%; /* #282A36 - Dracula background */
+    --card: 232 14% 22%; /* Brightened from 18% to 22% */
     --card-foreground: 60 30% 96%;
  
-    --popover: 231 15% 13%;
+    --popover: 231 15% 18%;
     --popover-foreground: 60 30% 96%;
  
     --primary: 326 100% 74%; /* #FF79C6 - Dracula pink */
@@ -44,14 +44,14 @@
   }
  
   .dark {
-    /* Dark Dracula Theme */
-    --background: 231 15% 13%;
+    /* Dark Dracula Theme - Slightly Brighter */
+    --background: 231 15% 18%;
     --foreground: 60 30% 96%;
  
-    --card: 232 14% 18%;
+    --card: 232 14% 22%;
     --card-foreground: 60 30% 96%;
  
-    --popover: 231 15% 13%;
+    --popover: 231 15% 18%;
     --popover-foreground: 60 30% 96%;
  
     --primary: 326 100% 74%;
@@ -99,34 +99,70 @@
     @apply font-normal bg-background;
   }
   
-  /* Enhanced shadows */
-  .shadow-card {
-    @apply shadow-[0_8px_16px_rgba(0,0,0,0.5)];
+  /* Enhanced Glass effects */
+  .glass {
+    @apply bg-background/30 backdrop-blur-md border border-border/50;
   }
-  
-  .border-glow {
-    @apply border-2 border-opacity-50 transition-all duration-200;
+
+  .glass-darker {
+    @apply bg-background/60 backdrop-blur-md border border-border/50;
   }
-  
+
+  .glass-card {
+    @apply bg-background/40 backdrop-blur-md border border-border/50;
+  }
+
+  .glass-popover {
+    @apply bg-background/80 backdrop-blur-md border border-border/50;
+  }
+
+  .glass-input {
+    @apply bg-background/30 backdrop-blur-sm border-border/50 focus:bg-background/40 focus:border-accent/50 transition-colors;
+  }
+
+  .glass-sidebar {
+    @apply bg-black/40 backdrop-blur-xl border-r border-white/10;
+  }
+
+  .glass-header {
+    @apply bg-white/5 backdrop-blur-xl border-b border-white/10 
+           shadow-[0_4px_12px_rgba(0,0,0,0.1)];
+  }
+
+  .glass-feature {
+    @apply glass-card p-6 text-center group 
+           hover:shadow-[0_12px_24px_rgba(0,0,0,0.2)] 
+           hover:translate-y-[-2px];
+  }
+
+  .glass-feature-icon {
+    @apply p-3 rounded-full bg-primary/20 group-hover:bg-primary/30 
+           transition-colors;
+  }
+
+  /* Decorative elements */
+  .glow-primary {
+    @apply absolute w-32 h-32 bg-primary/20 rounded-full blur-2xl opacity-60;
+  }
+
+  .glow-accent {
+    @apply absolute w-40 h-40 bg-accent/20 rounded-full blur-2xl opacity-60;
+  }
+
+  .glow-secondary {
+    @apply absolute w-36 h-36 bg-secondary/20 rounded-full blur-2xl opacity-60;
+  }
+
   /* Enhanced hover states */
   .hover-lift {
-    @apply hover:translate-y-[-2px] hover:shadow-[0_10px_20px_rgba(0,0,0,0.6)] transition-all duration-200;
-  }
-
-  /* Gradient backgrounds */
-  .bg-gradient-primary {
-    @apply bg-gradient-to-br from-primary/90 to-secondary/90;
-  }
-
-  .bg-gradient-accent {
-    @apply bg-gradient-to-br from-accent/90 to-primary/90;
+    @apply transition-transform duration-300 hover:-translate-y-1;
   }
 
   /* Card styles */
   .card-interactive {
-    @apply bg-card border-2 border-border shadow-card rounded-lg p-6 
-           hover:border-primary hover:shadow-[0_10px_20px_rgba(0,0,0,0.6)] 
-           hover:translate-y-[-2px] transition-all duration-200;
+    @apply glass-card rounded-lg p-6 
+           hover:shadow-[0_12px_24px_rgba(0,0,0,0.2)] 
+           hover:translate-y-[-2px] transition-all duration-300;
   }
 
   /* Button styles */
@@ -139,7 +175,8 @@
 
   /* Focus styles */
   .focus-ring {
-    @apply focus:ring-2 focus:ring-primary focus:ring-offset-4 focus:ring-offset-background focus:outline-none;
+    @apply focus:ring-2 focus:ring-primary/50 focus:ring-offset-4 
+           focus:ring-offset-background focus:outline-none;
   }
 
   /* Status indicators */
@@ -157,5 +194,39 @@
   
   .status-error {
     @apply bg-destructive shadow-[0_0_8px_rgba(255,85,85,0.5)];
+  }
+}
+
+@layer utilities {
+  .glass-dropdown {
+    @apply bg-background/80 backdrop-blur-md border border-border/50;
+  }
+
+  .animate-fade-in {
+    animation: fadeIn 0.5s ease-in forwards;
+  }
+
+  .animate-fade-in-up {
+    animation: fadeInUp 0.5s ease-out forwards;
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
   }
 } 

@@ -218,7 +218,7 @@ export function VisitorForm() {
                         <Input 
                           placeholder="John Doe" 
                           {...field} 
-                          className="bg-background/50 backdrop-blur-sm focus:bg-background/70"
+                          className="glass-input"
                         />
                       </FormControl>
                       <FormMessage />
@@ -236,7 +236,7 @@ export function VisitorForm() {
                         <Input 
                           placeholder="Company Name" 
                           {...field} 
-                          className="bg-background/50 backdrop-blur-sm focus:bg-background/70"
+                          className="glass-input"
                         />
                       </FormControl>
                       <FormMessage />
@@ -259,7 +259,7 @@ export function VisitorForm() {
                             placeholder="john@example.com" 
                             type="email" 
                             {...field} 
-                            className="bg-background/50 backdrop-blur-sm focus:bg-background/70"
+                            className="glass-input"
                           />
                         </FormControl>
                         <FormMessage />
@@ -280,7 +280,7 @@ export function VisitorForm() {
                           <Input 
                             placeholder="+1234567890" 
                             {...field} 
-                            className="bg-background/50 backdrop-blur-sm focus:bg-background/70"
+                            className="glass-input"
                           />
                         </FormControl>
                         <FormMessage />
@@ -313,11 +313,11 @@ export function VisitorForm() {
                         defaultValue={field.value}
                       >
                         <FormControl>
-                          <SelectTrigger className="bg-background/50 backdrop-blur-sm focus:bg-background/70">
+                          <SelectTrigger className="glass-input">
                             <SelectValue placeholder="Select a department" />
                           </SelectTrigger>
                         </FormControl>
-                        <SelectContent>
+                        <SelectContent className="glass-dropdown">
                           {departments.map((dept) => (
                             <SelectItem key={dept.id} value={dept.id}>
                               {dept.name}
@@ -338,11 +338,11 @@ export function VisitorForm() {
                       <FormLabel>Employee to Visit</FormLabel>
                       <Select onValueChange={field.onChange} defaultValue={field.value}>
                         <FormControl>
-                          <SelectTrigger className="bg-background/50 backdrop-blur-sm focus:bg-background/70">
+                          <SelectTrigger className="glass-input">
                             <SelectValue placeholder="Select an employee" />
                           </SelectTrigger>
                         </FormControl>
-                        <SelectContent>
+                        <SelectContent className="glass-dropdown">
                           {employees.map((emp) => (
                             <SelectItem key={emp.id} value={emp.id}>
                               {emp.name}
@@ -369,7 +369,7 @@ export function VisitorForm() {
                           <Input 
                             type="datetime-local" 
                             {...field} 
-                            className="bg-background/50 backdrop-blur-sm focus:bg-background/70"
+                            className="glass-input"
                           />
                         </FormControl>
                         <FormMessage />
@@ -385,11 +385,11 @@ export function VisitorForm() {
                         <FormLabel>Duration (minutes)</FormLabel>
                         <Select onValueChange={field.onChange} defaultValue={field.value}>
                           <FormControl>
-                            <SelectTrigger className="bg-background/50 backdrop-blur-sm focus:bg-background/70">
+                            <SelectTrigger className="glass-input">
                               <SelectValue placeholder="Select duration" />
                             </SelectTrigger>
                           </FormControl>
-                          <SelectContent>
+                          <SelectContent className="glass-dropdown">
                             <SelectItem value="30">30 minutes</SelectItem>
                             <SelectItem value="45">45 minutes</SelectItem>
                             <SelectItem value="60">1 hour</SelectItem>
@@ -413,7 +413,7 @@ export function VisitorForm() {
                         <Input 
                           placeholder="Brief description of your visit" 
                           {...field} 
-                          className="bg-background/50 backdrop-blur-sm focus:bg-background/70"
+                          className="glass-input"
                         />
                       </FormControl>
                       <FormMessage />

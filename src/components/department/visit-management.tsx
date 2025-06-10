@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Visit, Visitor, Employee, Department } from "@prisma/client";
 import {
   Card,
@@ -12,6 +12,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { format } from "date-fns";
+import { ActivityFilters } from "@/components/visit/activity-filters";
 
 interface VisitWithRelations extends Visit {
   visitor: Visitor;
@@ -21,41 +22,63 @@ interface VisitWithRelations extends Visit {
 
 interface VisitManagementProps {
   visits: VisitWithRelations[];
-  onStatusUpdate: (visitId: string, newStatus: string) => Promise<void>;
+  onStatusUpdate: (visitId: string, status: string) => void;
 }
 
-export function DepartmentVisitManagement({ visits, onStatusUpdate }: VisitManagementProps) {
-  const [filter, setFilter] = useState<"pending" | "approved" | "completed">("pending");
-
-  const filteredVisits = visits.filter((visit) => {
-    switch (filter) {
-      case "pending":
-        return visit.status === "PENDING";
-      case "approved":
-        return visit.status === "APPROVED" || visit.status === "CHECKED_IN";
-      case "completed":
-        return visit.status === "COMPLETED";
-      default:
-        return true;
-    }
-  });
-
-  function getStatusColor(status: string): string {
-    switch (status) {
-      case "PENDING":
-        return "bg-yellow-500";
-      case "APPROVED":
-        return "bg-green-500";
-      case "CHECKED_IN":
-        return "bg-blue-500";
-      case "COMPLETED":
-        return "bg-purple-500";
-      case "CANCELLED":
-        return "bg-red-500";
-      default:
-        return "bg-gray-500";
-    }
+const getStatusColor = (status: string) => {
+  switch (status) {
+    case "PENDING":
+      return "bg-yellow-500/10 text-yellow-500 hover:bg-yellow-500/20";
+    case "APPROVED":
+      return "bg-green-500/10 text-green-500 hover:bg-green-500/20";
+    case "CHECKED_IN":
+      return "bg-blue-500/10 text-blue-500 hover:bg-blue-500/20";
+    case "COMPLETED":
+      return "bg-purple-500/10 text-purple-500 hover:bg-purple-500/20";
+    case "CANCELLED":
+      return "bg-red-500/10 text-red-500 hover:bg-red-500/20";
+    default:
+      return "bg-gray-500/10 text-gray-500 hover:bg-gray-500/20";
   }
+};
+
+export function DepartmentVisitManagement({ visits, onStatusUpdate }: VisitManagementProps) {
+  const [filter, setFilter] = useState<"pending" | "active" | "completed">("pending");
+  const [filteredVisits, setFilteredVisits] = useState<VisitWithRelations[]>([]);
+
+  // Handle date range changes
+  const handleDateRangeChange = (startDate: Date | undefined, endDate: Date | undefined) => {
+    let filtered = [...visits];
+
+    // First apply date filter if dates are selected
+    if (startDate && endDate) {
+      filtered = filtered.filter(visit => {
+        const visitDate = new Date(visit.createdAt);
+        return visitDate >= startDate && visitDate <= endDate;
+      });
+    }
+
+    // Then apply status filter
+    filtered = filtered.filter((visit) => {
+      switch (filter) {
+        case "pending":
+          return visit.status === "PENDING";
+        case "active":
+          return visit.status === "APPROVED" || visit.status === "CHECKED_IN";
+        case "completed":
+          return visit.status === "COMPLETED" || visit.status === "CANCELLED";
+        default:
+          return true;
+      }
+    });
+
+    setFilteredVisits(filtered);
+  };
+
+  // Update filtered visits when filter changes
+  useEffect(() => {
+    handleDateRangeChange(undefined, undefined);
+  }, [filter, visits]);
 
   return (
     <Card>
@@ -66,24 +89,28 @@ export function DepartmentVisitManagement({ visits, onStatusUpdate }: VisitManag
           <Button
             variant={filter === "pending" ? "default" : "outline"}
             onClick={() => setFilter("pending")}
+            className="flex-1"
           >
-            Pending Approval
+            Pending Requests
           </Button>
           <Button
-            variant={filter === "approved" ? "default" : "outline"}
-            onClick={() => setFilter("approved")}
+            variant={filter === "active" ? "default" : "outline"}
+            onClick={() => setFilter("active")}
+            className="flex-1"
           >
-            Approved
+            Active Visits
           </Button>
           <Button
             variant={filter === "completed" ? "default" : "outline"}
             onClick={() => setFilter("completed")}
+            className="flex-1"
           >
-            Completed
+            Past Visits
           </Button>
         </div>
       </CardHeader>
       <CardContent>
+        <ActivityFilters visits={filteredVisits} onDateRangeChange={handleDateRangeChange} />
         <div className="grid gap-4">
           {filteredVisits.map((visit) => (
             <div
@@ -124,16 +151,18 @@ export function DepartmentVisitManagement({ visits, onStatusUpdate }: VisitManag
               </div>
 
               {visit.status === "PENDING" && (
-                <div className="flex justify-end gap-2">
+                <div className="flex gap-2">
                   <Button
+                    variant="default"
+                    className="flex-1"
                     onClick={() => onStatusUpdate(visit.id, "APPROVED")}
-                    className="bg-green-500 hover:bg-green-600"
                   >
                     Approve
                   </Button>
                   <Button
-                    onClick={() => onStatusUpdate(visit.id, "CANCELLED")}
                     variant="destructive"
+                    className="flex-1"
+                    onClick={() => onStatusUpdate(visit.id, "CANCELLED")}
                   >
                     Reject
                   </Button>
@@ -143,7 +172,7 @@ export function DepartmentVisitManagement({ visits, onStatusUpdate }: VisitManag
           ))}
 
           {filteredVisits.length === 0 && (
-            <div className="text-center py-8 text-muted-foreground">
+            <div className="text-center py-8 text-muted-foreground bg-card/50 rounded-lg">
               No visits found
             </div>
           )}
