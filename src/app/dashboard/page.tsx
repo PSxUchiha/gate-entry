@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { Visit, Visitor, Employee, Department } from "@prisma/client";
 import { VisitManagement } from "@/components/security/visit-management";
@@ -17,7 +17,7 @@ interface VisitWithRelations extends Visit {
   department: Department;
 }
 
-export default function DashboardPage() {
+function DashboardContent() {
   const searchParams = useSearchParams();
   const type = searchParams.get("type") || "employee";
   const departmentId = searchParams.get("departmentId");
@@ -126,5 +126,24 @@ export default function DashboardPage() {
         </TabsContent>
       </Tabs>
     </div>
+  );
+}
+
+export default function DashboardPage() {
+  return (
+    <Suspense fallback={
+      <div className="container mx-auto py-8">
+        <div className="animate-pulse">
+          <div className="h-8 bg-gray-200 rounded w-1/4 mb-4"></div>
+          <div className="h-4 bg-gray-200 rounded w-1/2 mb-8"></div>
+          <div className="space-y-4">
+            <div className="h-32 bg-gray-200 rounded"></div>
+            <div className="h-32 bg-gray-200 rounded"></div>
+          </div>
+        </div>
+      </div>
+    }>
+      <DashboardContent />
+    </Suspense>
   );
 } 
